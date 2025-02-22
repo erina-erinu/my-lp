@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人気女優一覧</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="script.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background: #f9f9f9;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            cursor: pointer;
+            color: #ff758c;
+            transition: color 0.3s ease-in-out;
+        }
+        h2:hover {
+            color: #e04050;
+        }
+        .actress-button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            background: #ff758c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .actress-button:hover {
+            background: #e04050;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const actressList = document.getElementById("actress-list");
+            actressList.innerHTML = "";
+            const actresses = JSON.parse(localStorage.getItem("actresses")) || [];
+            
+            actresses.forEach(actress => {
+                const button = document.createElement("button");
+                button.classList.add("actress-button");
+                button.textContent = actress;
+                button.onclick = function() {
+                    console.log("ボタンを押した女優:", actress); // デバッグ用
+                    window.location.href = `index.html?filterActress=${encodeURIComponent(actress)}`;
+                };
+                actressList.appendChild(button);
+            });
+
+            // タイトルをクリックしたらトップページへ戻る
+            document.getElementById("page-title").addEventListener("click", function() {
+                window.location.href = "index.html";
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2 id="page-title">人気女優一覧</h2>
+        <div id="actress-list">
+            <!-- 女優のリストがここに追加される -->
+        </div>
+        <br>
+        <a href="index.html">トップページへ戻る</a>
+    </div>
+</body>
+</html>

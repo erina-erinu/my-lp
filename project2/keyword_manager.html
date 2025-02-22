@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人気ワード一覧</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background: #f9f9f9;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .title {
+            cursor: pointer;
+            color: #ff4757;
+        }
+        .keyword-button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            background: #ff4757;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .keyword-button:hover {
+            background: #e04050;
+        }
+        .product-list {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .product-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .product-item img {
+            width: 150px;
+            height: 150px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="title" onclick="goToHomePage()">人気ワード一覧</h2>
+        <div id="keyword-list"></div>
+        
+        <h3>関連する商品</h3>
+        <div id="product-list" class="product-list"></div>
+        
+        <br>
+        <a href="index.html">トップページへ戻る</a>
+    </div>
+
+    <script>
+        function goToHomePage() {
+            window.location.href = 'index.html';
+        }
+
+        function loadKeywords() {
+            const keywordList = document.getElementById("keyword-list");
+            keywordList.innerHTML = "";
+            const keywords = JSON.parse(localStorage.getItem("keywords")) || [];
+            
+            keywords.forEach(keyword => {
+                const button = document.createElement("button");
+                button.classList.add("keyword-button");
+                button.textContent = keyword;
+                button.onclick = () => filterProductsByKeyword(keyword);
+                keywordList.appendChild(button);
+            });
+        }
+
+        function filterProductsByKeyword(keyword) {
+            const productList = document.getElementById("product-list");
+            productList.innerHTML = "";
+            const products = JSON.parse(localStorage.getItem("products")) || [];
+            
+            const filteredProducts = products.filter(product => product.keywords && product.keywords.includes(keyword));
+            
+            if (filteredProducts.length === 0) {
+                productList.innerHTML = "<p>このワードに関連する商品はありません。</p>";
+            } else {
+                filteredProducts.forEach(product => {
+                    const productItem = document.createElement("div");
+                    productItem.classList.add("product-item");
+                    productItem.innerHTML = `
+                        <img src="${product.imageUrl}" alt="${product.name}">
+                        <div>
+                            <a href="${product.url}" target="_blank">
+                                <strong>${product.name}</strong>
+                            </a>
+                            <p><strong>出演女優:</strong> ${product.actress ? product.actress : "未設定"}</p>
+                            <p><strong>関連ワード:</strong> ${product.keywords.join(", ")}</p>
+                        </div>
+                    `;
+                    productList.appendChild(productItem);
+                });
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            loadKeywords();
+        });
+    </script>
+</body>
+</html>

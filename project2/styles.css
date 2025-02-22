@@ -1,0 +1,113 @@
+/* 全体のフォント設定 */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f9f9f9;
+    color: #333;
+}
+
+/* ヘッダー部分 */
+.hero {
+    background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+    padding: 60px 20px;
+    color: white;
+    text-align: center;
+}
+
+/* ボタンのデザイン */
+.cta-button {
+    display: inline-block;
+    padding: 14px 28px;
+    margin-top: 20px;
+    background: #ff4757;
+    color: white;
+    text-decoration: none;
+    border-radius: 30px;
+    transition: transform 0.3s ease-in-out;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.cta-button:hover {
+    transform: scale(1.1);
+}
+
+/* 商品一覧を5列で表示 */
+.works-container {
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 10px !important;
+    padding: 20px !important;
+    max-width: 100%;
+    justify-content: center;
+}
+
+/* 商品カード */
+.work-card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 100%;
+    max-width: 220px;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* 画像サイズ統一 */
+.work-card img {
+    width: 100%;
+    height: 150px;
+    border-radius: 5px;
+    object-fit: cover;
+}
+
+/* 出演女優・関連ワードのボタン */
+.actor-container, .keyword-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+    padding: 10px 0;
+}
+
+.actor-button, .keyword-button {
+    display: inline-block;
+    padding: 5px 10px;
+    background: #ff758c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.actor-button:hover, .keyword-button:hover {
+    background: #e04050;
+}
+
+/* ページネーション */
+.pagination {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.pagination button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    background: #ff4757;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.pagination button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}

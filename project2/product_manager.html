@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品管理ページ</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background: #f9f9f9;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        input, button, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .add-button, .delete-button {
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .add-button:hover, .delete-button:hover {
+            background: #e04050;
+        }
+        .product-list {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .delete-button {
+            padding: 5px 10px;
+        }
+
+        /* 🛠 チェックボックスのレイアウト最適化 */
+        .keyword-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 5px;
+            text-align: left;
+            padding: 10px;
+            max-height: 150px; /* ✅ 高さを制限しスクロール可能に */
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #fff;
+        }
+        .keyword-container label {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            padding: 5px;
+        }
+        .keyword-container input {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>商品を追加</h2>
+        <input type="text" id="product-name" placeholder="商品名" required>
+        <input type="url" id="product-url" placeholder="商品URL" required>
+        <input type="url" id="product-image" placeholder="画像URL" required>
+        
+        <h3>出演女優</h3>
+        <select id="product-actress">
+            <!-- 人気女優リストを JavaScript で追加 -->
+        </select>
+        
+        <h3>関連ワード（最大7つ）</h3>
+        <div id="product-keywords" class="keyword-container">
+            <!-- JavaScript でチェックボックスを追加 -->
+        </div>
+        
+        <button class="add-button" onclick="addProduct()">追加</button>
+        <br>
+        <h3>登録済みの商品</h3>
+        <div id="product-list" class="product-list"></div>
+        <br>
+        <a href="index.html">トップページへ戻る</a>
+    </div>
+
+    <script>
+        function loadActressesAndKeywords() {
+            const actresses = JSON.parse(localStorage.getItem("actresses")) || [];
+            const keywords = JSON.parse(localStorage.getItem("keywords")) || [];
+            
+            // 出演女優リストを追加
+            const actressSelect = document.getElementById("product-actress");
+            actressSelect.innerHTML = actresses.map(actress => `<option value="${actress}">${actress}</option>`).join("");
+            
+            // 関連ワードをチェックボックスとして追加
+            const keywordContainer = document.getElementById("product-keywords");
+            keywordContainer.innerHTML = keywords.map(keyword => `
+                <label>
+                    <input type="checkbox" name="keywords" value="${keyword}" onclick="limitKeywords()">
+                    ${keyword}
+                </label>
+            `).join("");
+        }
+
+        function limitKeywords() {
+            const checkboxes = document.querySelectorAll('input[name="keywords"]:checked');
+            if (checkboxes.length > 7) {
+                alert("関連ワードは最大7つまで選択できます。");
+                checkboxes[checkboxes.length - 1].checked = false;
+            }
+        }
+
+        function addProduct() {
+            const name = document.getElementById("product-name").value;
+            const url = document.getElementById("product-url").value;
+            const imageUrl = document.getElementById("product-image").value;
+            const actress = document.getElementById("product-actress").value;
+            const keywords = Array.from(document.querySelectorAll('input[name="keywords"]:checked')).map(cb => cb.value);
+
+            if (name && url && imageUrl) {
+                const products = JSON.parse(localStorage.getItem("products")) || [];
+                products.unshift({ name, url, imageUrl, actress, keywords });
+                localStorage.setItem("products", JSON.stringify(products));
+                alert("商品が追加されました！");
+                document.getElementById("product-name").value = "";
+                document.getElementById("product-url").value = "";
+                document.getElementById("product-image").value = "";
+                loadProducts();
+            } else {
+                alert("すべてのフィールドを入力してください。");
+            }
+        }
+
+        function loadProducts() {
+            const productList = document.getElementById("product-list");
+            productList.innerHTML = "";
+            const products = JSON.parse(localStorage.getItem("products")) || [];
+            
+            products.forEach((product, index) => {
+                const productItem = document.createElement("div");
+                productItem.classList.add("product-item");
+                productItem.innerHTML = `
+                    <span>${product.name} - ${product.actress} - [${product.keywords.join(", ")}]</span>
+                    <button class="delete-button" onclick="deleteProduct(${index})">削除</button>
+                `;
+                productList.appendChild(productItem);
+            });
+        }
+
+        function deleteProduct(index) {
+            const products = JSON.parse(localStorage.getItem("products")) || [];
+            products.splice(index, 1);
+            localStorage.setItem("products", JSON.stringify(products));
+            alert("商品が削除されました！");
+            loadProducts();
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            loadActressesAndKeywords();
+            loadProducts();
+        });
+    </script>
+</body>
+</html>

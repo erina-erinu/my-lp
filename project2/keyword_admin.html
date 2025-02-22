@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人気ワード管理（管理者専用）</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background: #f9f9f9;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .add-button {
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .add-button:hover {
+            background: #e04050;
+        }
+        .list-container {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .list-item {
+            background: #fff;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>人気ワードを管理（管理者専用）</h2>
+        <input type="text" id="keyword-name" placeholder="ワード名を入力">
+        <button class="add-button" onclick="addKeyword()">追加</button>
+        <div id="keyword-list" class="list-container"></div>
+        <br>
+        <a href="index.html" class="add-button">トップページへ戻る</a>
+    </div>
+
+    <script>
+        function addKeyword() {
+            const name = document.getElementById("keyword-name").value;
+            if (name) {
+                const keywords = JSON.parse(localStorage.getItem("keywords")) || [];
+                keywords.push(name);
+                localStorage.setItem("keywords", JSON.stringify(keywords));
+                displayKeywords();
+                document.getElementById("keyword-name").value = "";
+            }
+        }
+
+        function displayKeywords() {
+            const list = document.getElementById("keyword-list");
+            list.innerHTML = "";
+            const keywords = JSON.parse(localStorage.getItem("keywords")) || [];
+            keywords.forEach(name => {
+                const item = document.createElement("div");
+                item.classList.add("list-item");
+                item.textContent = name;
+                list.appendChild(item);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            displayKeywords();
+        });
+    </script>
+
+</body>
+</html>
