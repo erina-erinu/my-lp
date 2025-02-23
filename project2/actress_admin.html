@@ -1,91 +1,118 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>人気女優管理（管理者専用）</title>
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            text-align: center;
-            background: #f9f9f9;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        input, button {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-        }
-        .add-button {
-            background: #ff4757;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .add-button:hover {
-            background: #e04050;
-        }
-        .list-container {
-            margin-top: 20px;
-            text-align: left;
-        }
-        .list-item {
-            background: #fff;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>人気女優管理（管理者専用）</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+      background: #f9f9f9;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+    }
+    .add-button {
+      background: #ff4757;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .add-button:hover {
+      background: #e04050;
+    }
+    .list-container {
+      margin-top: 20px;
+      text-align: left;
+    }
+    .list-item {
+      background: #fff;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+  <!-- Firebase SDK（互換性版）の読み込み -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script>
+    // firebaseConfig オブジェクトを正しく定義
+    const firebaseConfig = {
+      apiKey: "AIzaSyBTjSbRWjWJl9EEuT2226vQ4etEPziLH4Q",
+      authDomain: "lpmanegement.firebaseapp.com",
+      projectId: "lpmanegement",
+      storageBucket: "lpmanegement.firebasestorage.app",
+      messagingSenderId: "824143851981",
+      appId: "1:824143851981:web:f5b2adbd67181a50f05484",
+      measurementId: "G-FK0YV8JY47"
+    };
+
+    // Firebase の初期化（互換性版なら firebase.initializeApp を使用）
+    firebase.initializeApp(firebaseConfig);
+    // Analytics を使用しない場合は以下の行は削除またはコメントアウトしてください
+    // firebase.analytics();
+  </script>
 </head>
 <body>
+  <!-- ログインチェック -->
+  <script>
+    firebase.auth().onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = "login.html"; // 未ログインならログインページへリダイレクト
+      }
+    });
+  </script>
 
-    <div class="container">
-        <h2>人気女優を管理（管理者専用）</h2>
-        <input type="text" id="actress-name" placeholder="女優名を入力">
-        <button class="add-button" onclick="addActress()">追加</button>
-        <div id="actress-list" class="list-container"></div>
-        <br>
-        <a href="index.html" class="add-button">トップページへ戻る</a>
-    </div>
+  <div class="container">
+    <h2>人気女優を管理（管理者専用）</h2>
+    <input type="text" id="actress-name" placeholder="女優名を入力">
+    <button class="add-button" onclick="addActress()">追加</button>
+    <div id="actress-list" class="list-container"></div>
+    <br>
+    <a href="index.html" class="add-button">トップページへ戻る</a>
+  </div>
 
-    <script>
-        function addActress() {
-            const name = document.getElementById("actress-name").value;
-            if (name) {
-                const actresses = JSON.parse(localStorage.getItem("actresses")) || [];
-                actresses.push(name);
-                localStorage.setItem("actresses", JSON.stringify(actresses));
-                displayActresses();
-                document.getElementById("actress-name").value = "";
-            }
-        }
+  <script>
+    function addActress() {
+      const name = document.getElementById("actress-name").value;
+      if (name) {
+        const actresses = JSON.parse(localStorage.getItem("actresses")) || [];
+        actresses.push(name);
+        localStorage.setItem("actresses", JSON.stringify(actresses));
+        displayActresses();
+        document.getElementById("actress-name").value = "";
+      }
+    }
 
-        function displayActresses() {
-            const list = document.getElementById("actress-list");
-            list.innerHTML = "";
-            const actresses = JSON.parse(localStorage.getItem("actresses")) || [];
-            actresses.forEach(name => {
-                const item = document.createElement("div");
-                item.classList.add("list-item");
-                item.textContent = name;
-                list.appendChild(item);
-            });
-        }
+    function displayActresses() {
+      const list = document.getElementById("actress-list");
+      list.innerHTML = "";
+      const actresses = JSON.parse(localStorage.getItem("actresses")) || [];
+      actresses.forEach(name => {
+        const item = document.createElement("div");
+        item.classList.add("list-item");
+        item.textContent = name;
+        list.appendChild(item);
+      });
+    }
 
-        document.addEventListener("DOMContentLoaded", function() {
-            displayActresses();
-        });
-    </script>
-
+    document.addEventListener("DOMContentLoaded", function() {
+      displayActresses();
+    });
+  </script>
 </body>
 </html>

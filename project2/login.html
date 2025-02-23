@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理者ログイン</title>
+</head>
+<body>
+  <h2>管理者ログイン</h2>
+  <input type="email" id="email" placeholder="メールアドレス"><br>
+  <input type="password" id="password" placeholder="パスワード"><br>
+  <button onclick="login()">ログイン</button>
+  
+  <script type="module">
+    // Firebaseの各モジュールをインポート
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+    
+    // Firebase設定情報（measurementIdの前にカンマを追加済み）
+    const firebaseConfig = {
+      apiKey: "AIzaSyBTjSbRWjWJl9EEuT2226vQ4etEPziLH4Q",
+      authDomain: "lpmanegement.firebaseapp.com",
+      projectId: "lpmanegementID",
+      storageBucket: "lpmanegement.firebasestorage.app",
+      messagingSenderId: "824143851981",
+      appId: "1:824143851981:web:f5b2adbd67181a50f05484",
+      measurementId: "G-FK0YV8JY47"
+    };
+    
+    // Firebaseの初期化
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    
+    // グローバルにlogin関数を定義（onclick属性から利用できるように）
+    window.login = function login() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      signInWithEmailAndPassword(auth, email, password)
+        .then(() => {
+          // ログイン成功時、管理ページへリダイレクト
+          window.location.href = "product_manager.html";
+        })
+        .catch(error => {
+          alert("ログイン失敗: " + error.message);
+        });
+    }
+  </script>
+</body>
+</html>
