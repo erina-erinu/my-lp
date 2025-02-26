@@ -1,105 +1,139 @@
 document.addEventListener("DOMContentLoaded", function() {
     const productList = document.getElementById("product-list");
-
-    // `product-list` が存在しない場合のエラーチェック
+    const searchBox = document.getElementById("searchBox");
+    const searchButton = document.getElementById("searchButton");
+    const prevPageBtn = document.getElementById("prevPage");
+    const nextPageBtn = document.getElementById("nextPage");
+    
+    const addProductButton = document.getElementById("addProduct");
+    const productNameInput = document.getElementById("productName");
+    
     if (!productList) {
         console.error("Error: #product-list が見つかりません。");
         return;
     }
 
-    // URLのクエリパラメータを取得する関数
     function getQueryParam(param) {
         const urlParams = new URLSearchParams(window.location.search);
-        const value = urlParams.get(param);
-        console.log(`取得したクエリパラメータ [${param}]:`, value);
-        return value;
+        return urlParams.get(param);
     }
 
     let currentPage = 1;
-    const itemsPerPage = 10; // 1ページあたりの商品数を10に変更
+    const itemsPerPage = 10;
 
-    function loadProducts() {
-        productList.innerHTML = ""; // 画面をクリア
-        const products = JSON.parse(localStorage.getItem("products")) || [];
+    async function loadProducts() {
+        productList.innerHTML = "";
+        try {
+            const response = await fetch("/.netlify/functions/getProducts");
+            const products = await response.json();
+            
+            if (!Array.isArray(products)) {
+                throw new Error("取得したデータが配列ではありません。");
+            }
 
-        // クエリパラメータから `filterActress` と `filterKeyword` の値を取得
-        const filterActress = getQueryParam("filterActress");
-        const filterKeyword = getQueryParam("filterKeyword");
-        console.log("フィルタリングする女優:", filterActress);
-        console.log("フィルタリングするワード:", filterKeyword);
+            const filterActress = getQueryParam("filterActress");
+            const filterKeyword = getQueryParam("filterKeyword");
+            const searchKeyword = getQueryParam("search") || "";
+            
+            let filteredProducts = products;
 
-        let filteredProducts = products;
+            if (filterActress && filterActress !== "null") {
+                filteredProducts = filteredProducts.filter(product => product.actress && product.actress === filterActress);
+            }
 
-        // 女優でフィルタリング
-        if (filterActress && filterActress !== "null") {
-            filteredProducts = filteredProducts.filter(product => product.actress && product.actress === filterActress);
+            if (filterKeyword && filterKeyword !== "null") {
+                filteredProducts = filteredProducts.filter(product => 
+                    product.keywords && product.keywords.includes(filterKeyword)
+                );
+            }
+
+            if (searchKeyword.trim() !== "") {
+                filteredProducts = filteredProducts.filter(product => 
+                    product.name.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+                    (product.keywords && product.keywords.some(keyword => keyword.toLowerCase().includes(searchKeyword.toLowerCase())))
+                );
+            }
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filteredProducts.length);
+            const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+
+            paginatedProducts.forEach((product, index) => {
+                const productItem = document.createElement("div");
+                productItem.classList.add("work-card");
+
+                let actressHTML = product.actress 
+                    ? `<button class='actor-button' onclick="filterByActress('${product.actress}')">${product.actress}</button>` 
+                    : "未設定";
+
+                let keywordsHTML = (product.keywords && product.keywords.length > 0)
+                    ? product.keywords.map(word => `<button class='keyword-button' onclick="filterByKeyword('${word}')">${word}</button>`).join(" ")
+                    : "なし";
+
+                let truncatedName = product.name.length > 30 ? product.name.substring(0, 30) + "..." : product.name;
+
+                productItem.innerHTML = `
+                    <a href="${product.url}" target="_blank">
+                        <img src="${product.imageUrl}" alt="${product.name}">
+                        <h3>${truncatedName}</h3>
+                    </a>
+                    <p><strong>出演女優:</strong> ${actressHTML}</p>
+                    <p><strong>関連ワード:</strong> ${keywordsHTML}</p>
+                    <button class='delete-button' onclick="removeProduct(${index})">削除</button>
+                `;
+                productList.appendChild(productItem);
+            });
+
+            updatePagination(filteredProducts.length);
+        } catch (error) {
+            console.error("Firestore のデータ取得エラー:", error);
         }
+    }
 
-        // キーワードでフィルタリング
-        if (filterKeyword && filterKeyword !== "null") {
-            filteredProducts = filteredProducts.filter(product => 
-                product.keywords && product.keywords.includes(filterKeyword)
-            );
-        }
+    if (addProductButton) {
+        addProductButton.addEventListener("click", async function () {
+            const productName = productNameInput.value.trim();
+            if (!productName) return;
 
-        // ページネーションの処理
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = Math.min(startIndex + itemsPerPage, filteredProducts.length);
-        const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+            const productData = {
+                name: productName,
+                url: "#",
+                imageUrl: "default.jpg",
+                actress: "",
+                keywords: []
+            };
 
-        // フィルタリング後のデータを表示
-        paginatedProducts.forEach(product => {
-            const productItem = document.createElement("div");
-            productItem.classList.add("work-card");
-
-            let actressHTML = product.actress 
-                ? `<button class='actor-button' onclick="filterByActress('${product.actress}')">${product.actress}</button>` 
-                : "未設定";
-
-            let keywordsHTML = (product.keywords && product.keywords.length > 0)
-                ? product.keywords.map(word => `<button class='keyword-button' onclick="filterByKeyword('${word}')">${word}</button>`).join(" ")
-                : "なし";
-
-            // 商品名を30文字まで制限し、それ以上の場合は「...」を追加
-            let truncatedName = product.name.length > 30 ? product.name.substring(0, 30) + "..." : product.name;
-
-            productItem.innerHTML = `
-                <a href="${product.url}" target="_blank">
-                    <img src="${product.imageUrl}" alt="${product.name}">
-                    <h3>${truncatedName}</h3>
-                </a>
-                <p><strong>出演女優:</strong> ${actressHTML}</p>
-                <p><strong>関連ワード:</strong> ${keywordsHTML}</p>
-            `;
-            productList.appendChild(productItem);
+            try {
+                const response = await fetch("/.netlify/functions/addProduct", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(productData)
+                });
+                const result = await response.json();
+                console.log("Product added:", result);
+                loadProducts();
+            } catch (error) {
+                console.error("Product追加エラー:", error);
+            }
         });
-
-        updatePagination(filteredProducts.length);
     }
 
-    function updatePagination(totalItems) {
-        document.getElementById("prevPage").disabled = currentPage === 1;
-        document.getElementById("nextPage").disabled = currentPage * itemsPerPage >= totalItems;
-    }
-
-    function changePage(offset) {
-        currentPage += offset;
-        loadProducts();
-    }
-
-    // 女優ボタンをクリックしたときのフィルタリング処理
-    window.filterByActress = function(actress) {
-        window.location.href = `index.html?filterActress=${encodeURIComponent(actress)}`;
-    };
-
-    // キーワードボタンをクリックしたときのフィルタリング処理
-    window.filterByKeyword = function(keyword) {
-        window.location.href = `index.html?filterKeyword=${encodeURIComponent(keyword)}`;
+    window.removeProduct = async function(index) {
+        try {
+            const response = await fetch("/.netlify/functions/deleteProduct", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ index })
+            });
+            const result = await response.json();
+            console.log("Product deleted:", result);
+            loadProducts();
+        } catch (error) {
+            console.error("Product削除エラー:", error);
+        }
     };
 
     loadProducts();
-
-    // ページネーション用のイベントリスナーを追加
-    document.getElementById("prevPage").addEventListener("click", () => changePage(-1));
-    document.getElementById("nextPage").addEventListener("click", () => changePage(1));
+    prevPageBtn.addEventListener("click", () => changePage(-1));
+    nextPageBtn.addEventListener("click", () => changePage(1));
 });

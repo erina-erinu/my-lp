@@ -3,9 +3,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Page</title>
+    <title>作品紹介LP</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="script.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f9f9f9;
+            color: #333;
+        }
+        .hero {
+            background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+            padding: 60px 20px;
+            color: white;
+            text-align: center;
+        }
+        .hero h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+        .hero a {
+            color: white;
+            text-decoration: none;
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 14px 28px;
+            margin-top: 20px;
+            background: #ff4757;
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            transition: transform 0.3s ease-in-out;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .cta-button:hover {
+            transform: scale(1.1);
+        }
+        .works-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+        .work-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 250px;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-grow: 1;
+        }
+        .work-card img {
+            max-width: 100%;
+            height: 150px;
+            border-radius: 5px;
+            object-fit: cover;
+        }
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .pagination button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            background: #ff4757;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .pagination button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .pagination .page-number {
+            padding: 8px 12px;
+            margin: 2px;
+            border-radius: 5px;
+            background: #eee;
+            cursor: pointer;
+            display: inline-block;
+        }
+        .pagination .page-number.active {
+            background: #ff4757;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+    <script>
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        let currentPage = 1;
+        const itemsPerPage = 10;
+
+        function loadProducts() {
+            const productList = document.getElementById("product-list");
+            productList.innerHTML = "";
+            const products = JSON.parse(localStorage.getItem("products")) || [];
+
+            const filterActress = getQueryParam("filterActress");
+            console.log("フィルタリングする女優:", filterActress);
+
+            let filteredProducts = products;
+            if (filterActress !== null && filterActress !== "") {
+                filteredProducts = products.filter(product => product.actress && product.actress === filterActress);
+            }
+
+            const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filteredProducts.length);
+            const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+
+            paginatedProducts.forEach(product => {
+                const productItem = document.createElement("div");
+                productItem.classList.add("work-card");
+                
+                let trimmedName = product.name.length > 30 ? product.name.substring(0, 30) + "…" : product.name;
+                
+                productItem.innerHTML = `
+                    <a href="${product.url}" target="_blank">
+                        <img src="${product.imageUrl}" alt="${product.name}">
+                        <h3>${trimmedName}</h3>
+                    </a>
+                `;
+                productList.appendChild(productItem);
+            });
+
+            updatePagination(filteredProducts.length);
+        }
+
+        function updatePagination(totalItems) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const paginationContainer = document.getElementById("pagination");
+            paginationContainer.innerHTML = "";
+
+            const prevButton = document.createElement("button");
+            prevButton.textContent = "前のページ";
+            prevButton.disabled = currentPage === 1;
+            prevButton.onclick = () => changePage(-1);
+            paginationContainer.appendChild(prevButton);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement("span");
+                pageButton.textContent = i;
+                pageButton.classList.add("page-number");
+                if (i === currentPage) {
+                    pageButton.classList.add("active");
+                }
+                pageButton.onclick = () => goToPage(i);
+                paginationContainer.appendChild(pageButton);
+            }
+
+            const nextButton = document.createElement("button");
+            nextButton.textContent = "次のページ";
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.onclick = () => changePage(1);
+            paginationContainer.appendChild(nextButton);
+        }
+
+        function changePage(offset) {
+            currentPage += offset;
+            loadProducts();
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            loadProducts();
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            loadProducts();
+        });
+    </script>
 </head>
 <body>
-    <h1>It Works!</h1>
+<header class="hero">
+    <a href="index.html"><h1>えりなの痴女・М男</h1></a>
+    <p>女性優位のアダルトコンテンツを紹介。18禁</p>
+    <a href="#works" class="cta-button">今すぐチェック</a>
+    <a href="actress_manager.html" class="cta-button">人気女優</a>
+    <a href="keyword_manager.html" class="cta-button">人気ワード</a>
+    <input type="text" id="searchBox" placeholder="商品名やキーワードで検索">
+    <button id="searchButton">検索</button>
+</header>
+
+<section id="works" class="works">
+    <h2>人気作品</h2>
+    <div id="product-list" class="works-container">
+        <!-- 商品がここに追加される -->
+    </div>
+    <div id="pagination" class="pagination">
+        <!-- ページネーションがここに表示される -->
+        <button id="prevPage">前のページ</button>
+        <span id="pageIndicator">1</span>
+        <button id="nextPage">次のページ</button>
+    </div>
+</section>
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-analytics.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+  
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyBTjSbRWjWJl9EEuT2226vQ4etEPziLH4Q",
+      authDomain: "lpmanegement.firebaseapp.com",
+      projectId: "lpmanegement",
+      storageBucket: "lpmanegement.firebasestorage.app",
+      messagingSenderId: "824143851981",
+      appId: "1:824143851981:web:f5b2adbd67181a50f05484",
+      measurementId: "G-FK0YV8JY47"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+  </script>
 </body>
 </html>

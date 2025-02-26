@@ -1,0 +1,18 @@
+{
+  "name": "netlify-firebase-functions",
+  "version": "1.0.0",
+  "description": "A project using Netlify Functions with Firebase Admin SDK",
+  "main": "index.js",
+  "scripts": {
+    "start": "netlify dev",
+    "build": "netlify build"
+  },
+  "dependencies": {
+    "firebase-admin": "^11.0.0",
+    "@netlify/functions": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "license": "MIT"
+}
